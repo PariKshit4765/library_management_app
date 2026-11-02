@@ -1,0 +1,43 @@
+{% extends "base.html" %}
+{% block title %}Transactions - Library Management System{% endblock %}
+{% block content %}
+<div class="page-head">
+  <h1>Transactions</h1>
+  <a class="btn btn-primary" href="{{ url_for('issue_book') }}">+ Issue Book</a>
+</div>
+
+<div class="tabs">
+  {% for key, label in [('issued','Currently Issued'),('overdue','Overdue'),('returned','Returned'),('all','All')] %}
+    <a href="{{ url_for('issues', status=key) }}" class="tab {{ 'active' if flt == key }}">{{ label }}</a>
+  {% endfor %}
+</div>
+
+<div class="card table-wrap">
+  <table>
+    <thead><tr><th>#</th><th>Book</th><th>Member</th><th>Issued</th><th>Due</th><th>Returned</th><th>Fine (Rs.)</th><th>Status</th><th></th></tr></thead>
+    <tbody>
+    {% for i in issues %}
+      <tr>
+        <td>{{ i.id }}</td><td>{{ i.title }}</td><td>{{ i.member }}</td>
+        <td>{{ i.issue_date }}</td><td>{{ i.due_date }}</td><td>{{ i.return_date or '-' }}</td>
+        <td>{{ i.fine }}</td>
+        <td><span class="badge badge-{{ 'ok' if i.status == 'returned' else ('danger' if i.overdue else 'warn') }}">
+          {{ 'Returned' if i.status == 'returned' else ('Overdue' if i.overdue else 'Issued') }}</span></td>
+        <td>
+          {% if i.status == 'issued' %}
+          <form method="post" action="{{ url_for('return_book', issue_id=i.id) }}"
+                data-confirm="Mark this book as returned?{% if i.fine %} A fine of Rs. {{ i.fine }} applies.{% endif %}">
+            <input type="hidden" name="_csrf" value="{{ csrf_token() }}">
+            <input type="hidden" name="next" value="{{ request.full_path.rstrip('?') }}">
+            <button class="btn btn-small btn-primary" type="submit">Return</button>
+          </form>
+          {% endif %}
+        </td>
+      </tr>
+    {% else %}
+      <tr><td colspan="9" class="empty">No transactions in this view.</td></tr>
+    {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endblock %}

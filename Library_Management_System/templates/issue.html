@@ -1,0 +1,31 @@
+{% extends "base.html" %}
+{% block title %}Issue Book - Library Management System{% endblock %}
+{% block content %}
+<h1>Issue a Book</h1>
+<form method="post" class="card form" novalidate>
+  <input type="hidden" name="_csrf" value="{{ csrf_token() }}">
+  <div class="form-grid">
+    <label>Member *
+      <input type="search" class="select-filter" data-target="memberSelect" placeholder="Type to filter members...">
+      <select name="member_id" id="memberSelect" required size="6">
+        {% for m in members %}
+          <option value="{{ m.id }}">{{ m.name }} ({{ m.email }})</option>
+        {% endfor %}
+      </select>
+    </label>
+    <label>Book *
+      <input type="search" class="select-filter" data-target="bookSelect" placeholder="Type to filter books...">
+      <select name="book_id" id="bookSelect" required size="6">
+        {% for b in books %}
+          <option value="{{ b.id }}">{{ b.title }} - {{ b.author }} ({{ b.available_copies }} left)</option>
+        {% endfor %}
+      </select>
+    </label>
+  </div>
+  <p class="muted">Loan period: <strong>{{ loan_days }} days</strong>. Late fine: <strong>Rs. {{ fine_per_day }}/day</strong>. Maximum 5 books per member.</p>
+  <div class="form-actions">
+    <button type="submit" class="btn btn-primary">Issue Book</button>
+    <a class="btn btn-outline" href="{{ url_for('issues') }}">View Transactions</a>
+  </div>
+</form>
+{% endblock %}

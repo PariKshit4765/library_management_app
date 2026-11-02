@@ -1,0 +1,46 @@
+{% extends "base.html" %}
+{% block title %}Books - Library Management System{% endblock %}
+{% block content %}
+<div class="page-head">
+  <h1>Books</h1>
+  <a class="btn btn-primary" href="{{ url_for('add_book') }}">+ Add Book</a>
+</div>
+
+<form class="filters" method="get" id="bookFilter">
+  <input type="search" name="q" id="liveSearch" placeholder="Search title, author or ISBN..." value="{{ q }}">
+  <select name="category">
+    <option value="">All categories</option>
+    {% for c in categories %}
+      <option value="{{ c.id }}" {{ 'selected' if category == c.id|string }}>{{ c.name }}</option>
+    {% endfor %}
+  </select>
+  <button class="btn btn-outline" type="submit">Search</button>
+</form>
+
+<div class="card table-wrap">
+  <table id="booksTable">
+    <thead><tr><th>Title</th><th>Author</th><th>ISBN</th><th>Category</th><th>Year</th><th>Available</th><th>Actions</th></tr></thead>
+    <tbody>
+    {% for b in books %}
+      <tr>
+        <td><strong>{{ b.title }}</strong><br><small class="muted">{{ b.publisher or '' }}</small></td>
+        <td>{{ b.author }}</td>
+        <td>{{ b.isbn }}</td>
+        <td>{{ b.category or '-' }}</td>
+        <td>{{ b.year or '-' }}</td>
+        <td><span class="badge badge-{{ 'ok' if b.available_copies > 0 else 'danger' }}">{{ b.available_copies }} / {{ b.total_copies }}</span></td>
+        <td class="actions">
+          <a class="btn btn-small btn-outline" href="{{ url_for('edit_book', book_id=b.id) }}">Edit</a>
+          <form method="post" action="{{ url_for('delete_book', book_id=b.id) }}" data-confirm="Delete '{{ b.title }}'? This cannot be undone.">
+            <input type="hidden" name="_csrf" value="{{ csrf_token() }}">
+            <button class="btn btn-small btn-danger" type="submit">Delete</button>
+          </form>
+        </td>
+      </tr>
+    {% else %}
+      <tr><td colspan="7" class="empty">No books found.</td></tr>
+    {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endblock %}

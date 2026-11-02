@@ -1,0 +1,48 @@
+{% extends "base.html" %}
+{% block title %}Reports - Library Management System{% endblock %}
+{% block content %}
+<div class="page-head">
+  <h1>Reports</h1>
+  <button class="btn btn-outline" onclick="window.print()">Print</button>
+</div>
+
+<section class="stats">
+  <div class="stat stat-danger"><span class="stat-num">{{ overdue|length }}</span><span class="stat-label">Overdue Books</span></div>
+  <div class="stat stat-warn"><span class="stat-num">Rs. {{ pending }}</span><span class="stat-label">Pending Fines</span></div>
+  <div class="stat"><span class="stat-num">Rs. {{ collected }}</span><span class="stat-label">Fines Collected</span></div>
+</section>
+
+<section class="card">
+  <h2>Overdue Books</h2>
+  <div class="table-wrap">
+  <table>
+    <thead><tr><th>Book</th><th>Member</th><th>Phone</th><th>Due Date</th><th>Days Late</th><th>Fine (Rs.)</th></tr></thead>
+    <tbody>
+    {% for o in overdue %}
+      <tr><td>{{ o.title }}</td><td>{{ o.member }}</td><td>{{ o.phone or '-' }}</td>
+          <td>{{ o.due_date }}</td><td>{{ o.days_late }}</td><td>{{ o.fine }}</td></tr>
+    {% else %}
+      <tr><td colspan="6" class="empty">No overdue books. &#127881;</td></tr>
+    {% endfor %}
+    </tbody>
+  </table>
+  </div>
+</section>
+
+<div class="grid-2">
+  <section class="card">
+    <h2>Most Borrowed Books</h2>
+    <ol class="rank">
+      {% for p in popular %}<li><strong>{{ p.title }}</strong> <span class="muted">by {{ p.author }}</span> <span class="badge badge-ok">{{ p.times }}x</span></li>
+      {% else %}<li class="empty">No data yet.</li>{% endfor %}
+    </ol>
+  </section>
+  <section class="card">
+    <h2>Most Active Members</h2>
+    <ol class="rank">
+      {% for m in active_members %}<li><strong>{{ m.name }}</strong> <span class="badge badge-ok">{{ m.times }} loans</span></li>
+      {% else %}<li class="empty">No data yet.</li>{% endfor %}
+    </ol>
+  </section>
+</div>
+{% endblock %}

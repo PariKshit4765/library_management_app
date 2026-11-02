@@ -1,0 +1,71 @@
+{% extends "base.html" %}
+{% block title %}Dashboard - Library Management System{% endblock %}
+{% block content %}
+<h1>Dashboard</h1>
+
+<section class="stats" id="stats">
+  <div class="stat"><span class="stat-num" data-stat="titles">{{ stats.titles }}</span><span class="stat-label">Book Titles</span></div>
+  <div class="stat"><span class="stat-num" data-stat="total_books">{{ stats.total_books }}</span><span class="stat-label">Total Copies</span></div>
+  <div class="stat"><span class="stat-num" data-stat="available">{{ stats.available }}</span><span class="stat-label">Available</span></div>
+  <div class="stat"><span class="stat-num" data-stat="members">{{ stats.members }}</span><span class="stat-label">Active Members</span></div>
+  <div class="stat"><span class="stat-num" data-stat="issued">{{ stats.issued }}</span><span class="stat-label">Currently Issued</span></div>
+  <div class="stat stat-danger"><span class="stat-num" data-stat="overdue">{{ stats.overdue }}</span><span class="stat-label">Overdue</span></div>
+  <div class="stat stat-warn"><span class="stat-num">Rs. <span data-stat="fines">{{ stats.fines }}</span></span><span class="stat-label">Fines Recorded</span></div>
+</section>
+
+<div class="grid-2">
+  <section class="card">
+    <h2>Recent Transactions</h2>
+    <div class="table-wrap">
+    <table>
+      <thead><tr><th>Book</th><th>Member</th><th>Issued</th><th>Due</th><th>Status</th></tr></thead>
+      <tbody>
+      {% for r in recent %}
+        <tr>
+          <td>{{ r.title }}</td><td>{{ r.member }}</td><td>{{ r.issue_date }}</td><td>{{ r.due_date }}</td>
+          <td><span class="badge badge-{{ 'ok' if r.status == 'returned' else ('danger' if r.due_date < today else 'warn') }}">
+            {{ 'Returned' if r.status == 'returned' else ('Overdue' if r.due_date < today else 'Issued') }}</span></td>
+        </tr>
+      {% else %}
+        <tr><td colspan="5" class="empty">No transactions yet.</td></tr>
+      {% endfor %}
+      </tbody>
+    </table>
+    </div>
+  </section>
+
+  <section class="card">
+    <h2>Books by Category</h2>
+    {% set maxn = (by_cat | map(attribute='n') | max) if by_cat else 1 %}
+    {% for c in by_cat %}
+      <div class="bar-row">
+        <span class="bar-label">{{ c.name }}</span>
+        <div class="bar"><div class="bar-fill" style="width: {{ (c.n / maxn * 100) | round(0) }}%"></div></div>
+        <span class="bar-value">{{ c.n }}</span>
+      </div>
+    {% else %}
+      <p class="empty">No books yet.</p>
+    {% endfor %}
+    <div class="quick">
+      <a class="btn btn-primary" href="{{ url_for('issue_book') }}">Issue a Book</a>
+      <a class="btn btn-outline" href="{{ url_for('add_book') }}">Add Book</a>
+      <a class="btn btn-outline" href="{{ url_for('add_member') }}">Add Member</a>
+    </div>
+  </section>
+</div>
+{% endblock %}
+{% block scripts %}
+<script>
+  // Live-refresh dashboard numbers every 30 seconds from the JSON API.
+  setInterval(async () => {
+    try {
+      const res = await fetch("{{ url_for('api_stats') }}", {credentials: "same-origin"});
+      if (!res.ok) return;
+      const s = await res.json();
+      document.querySelectorAll("[data-stat]").forEach(el => {
+        if (s[el.dataset.stat] !== undefined) el.textContent = s[el.dataset.stat];
+      });
+    } catch (e) { /* ignore network hiccups */ }
+  }, 30000);
+</script>
+{% endblock %}

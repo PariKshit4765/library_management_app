@@ -1,0 +1,40 @@
+{% extends "base.html" %}
+{% block title %}{{ 'Add' if mode == 'add' else 'Edit' }} Book - Library Management System{% endblock %}
+{% block content %}
+<h1>{{ 'Add New Book' if mode == 'add' else 'Edit Book' }}</h1>
+<form method="post" class="card form" novalidate>
+  <input type="hidden" name="_csrf" value="{{ csrf_token() }}">
+  <div class="form-grid">
+    <label>ISBN *
+      <input type="text" name="isbn" required value="{{ book.isbn or '' }}">
+    </label>
+    <label>Title *
+      <input type="text" name="title" required value="{{ book.title or '' }}">
+    </label>
+    <label>Author *
+      <input type="text" name="author" required value="{{ book.author or '' }}">
+    </label>
+    <label>Publisher
+      <input type="text" name="publisher" value="{{ book.publisher or '' }}">
+    </label>
+    <label>Year
+      <input type="number" name="year" min="1000" max="2100" value="{{ book.year or '' }}">
+    </label>
+    <label>Category
+      <select name="category_id">
+        <option value="">-- none --</option>
+        {% for c in categories %}
+          <option value="{{ c.id }}" {{ 'selected' if book.category_id == c.id }}>{{ c.name }}</option>
+        {% endfor %}
+      </select>
+    </label>
+    <label>Total Copies *
+      <input type="number" name="total_copies" min="1" required value="{{ book.total_copies or 1 }}">
+    </label>
+  </div>
+  <div class="form-actions">
+    <button type="submit" class="btn btn-primary">{{ 'Add Book' if mode == 'add' else 'Save Changes' }}</button>
+    <a class="btn btn-outline" href="{{ url_for('books') }}">Cancel</a>
+  </div>
+</form>
+{% endblock %}

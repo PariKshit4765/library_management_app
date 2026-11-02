@@ -1,0 +1,40 @@
+{% extends "base.html" %}
+{% block title %}Members - Library Management System{% endblock %}
+{% block content %}
+<div class="page-head">
+  <h1>Members</h1>
+  <a class="btn btn-primary" href="{{ url_for('add_member') }}">+ Add Member</a>
+</div>
+
+<form class="filters" method="get">
+  <input type="search" name="q" id="liveSearch" placeholder="Search name, email or phone..." value="{{ q }}">
+  <button class="btn btn-outline" type="submit">Search</button>
+</form>
+
+<div class="card table-wrap">
+  <table id="membersTable">
+    <thead><tr><th>Name</th><th>Email</th><th>Phone</th><th>Joined</th><th>Borrowed</th><th>Status</th><th>Actions</th></tr></thead>
+    <tbody>
+    {% for m in members %}
+      <tr>
+        <td><strong>{{ m.name }}</strong><br><small class="muted">{{ m.address or '' }}</small></td>
+        <td>{{ m.email }}</td>
+        <td>{{ m.phone or '-' }}</td>
+        <td>{{ m.join_date }}</td>
+        <td>{{ m.borrowed }}</td>
+        <td><span class="badge badge-{{ 'ok' if m.status == 'active' else 'muted' }}">{{ m.status|capitalize }}</span></td>
+        <td class="actions">
+          <a class="btn btn-small btn-outline" href="{{ url_for('edit_member', member_id=m.id) }}">Edit</a>
+          <form method="post" action="{{ url_for('delete_member', member_id=m.id) }}" data-confirm="Delete member '{{ m.name }}'?">
+            <input type="hidden" name="_csrf" value="{{ csrf_token() }}">
+            <button class="btn btn-small btn-danger" type="submit">Delete</button>
+          </form>
+        </td>
+      </tr>
+    {% else %}
+      <tr><td colspan="7" class="empty">No members found.</td></tr>
+    {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endblock %}
